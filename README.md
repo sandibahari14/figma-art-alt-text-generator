@@ -1,0 +1,1 @@
+# figma-art-alt-text-generator
