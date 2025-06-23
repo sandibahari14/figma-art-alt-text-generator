@@ -357,6 +357,7 @@ SOFTWARE.
 - Users are responsible for their own Claude API usage and associated costs
 - Compliance with accessibility standards is the responsibility of the user
 - Users should follow platform terms of service for Figma, Anthropic, and deployment platforms
+- *All artwork in demo images is Copyright (c) 2025 Stephanie Buscema. All rights reserved. Used with artist's permission and not included as part of plugin.* 
 
 ## Version History
 
