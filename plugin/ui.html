@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px; 
+      margin: 0;
+      background: #f8f9fa;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      padding: 20px;
+      margin: -20px -20px 20px -20px;
+      border-radius: 0 0 8px 8px;
+      text-align: center;
+    }
+    .header h2 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .header p {
+      margin: 0;
+      opacity: 0.8;
+      font-size: 12px;
+    }
+    .btn { 
+      background: #4f46e5;
+      color: white; 
+      border: none; 
+      padding: 12px 16px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      width: 100%; 
+      margin-bottom: 12px; 
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: background 0.2s ease;
+    }
+    .btn:hover { 
+      background: #4338ca;
+    }
+    .btn:disabled { 
+      background: #d1d5db; 
+      cursor: not-allowed; 
+    }
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      width: auto;
+      margin: 4px 4px 0 0;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-secondary:hover { 
+      background: #4b5563;
+    }
+    .result { 
+      background: white; 
+      padding: 16px; 
+      margin: 10px 0; 
+      border-radius: 6px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 3px solid #e5e7eb;
+    }
+    .success { border-left-color: #10b981; }
+    .error { 
+      background: #fef2f2; 
+      color: #991b1b; 
+      border-left-color: #dc2626;
+    }
+    .alt-text { 
+      background: #f9fafb; 
+      padding: 12px; 
+      border-radius: 4px; 
+      margin: 10px 0; 
+      border: 1px solid #e5e7eb; 
+      font-size: 12px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .char-count { 
+      font-size: 10px; 
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .char-count.over-limit { color: #dc2626; font-weight: 600; }
+    .char-count.perfect { color: #059669; font-weight: 600; }
+    .status { 
+      background: #f0f9ff; 
+      border: 1px solid #bae6fd; 
+      border-radius: 4px; 
+      padding: 12px; 
+      margin-bottom: 16px; 
+      font-size: 12px;
+      color: #0369a1;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .copy-btn:hover { 
+      background: #4338ca;
+    }
+    .copy-btn.copied { background: #10b981; }
+    .bulk-actions {
+      background: white;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 3px solid #4f46e5;
+    }
+    .bulk-actions h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .stats {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+    .node-name {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+    .error-message {
+      color: #991b1b;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>🎨 Art Alt Text Generator</h2>
+    <p>AI-powered accessibility descriptions</p>
+  </div>
+  
+  <button id="analyze-btn" class="btn">🔍 Analyze Selected Artwork</button>
+  
+  <div id="status"></div>
+  <div id="bulk-actions" class="bulk-actions" style="display: none;">
+    <h3>Bulk Actions</h3>
+    <div id="stats" class="stats"></div>
+    <button id="copy-all-btn" class="btn-secondary">📋 Copy All Alt Text</button>
+    <button id="reprocess-long-btn" class="btn-secondary">🔄 Reprocess Long Descriptions</button>
+  </div>
+  <div id="results"></div>
+
+  <script>
+    let currentResults = [];
+
+    document.getElementById('analyze-btn').addEventListener('click', () => {
+      parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');
+      document.getElementById('analyze-btn').disabled = true;
+      hideElement('bulk-actions');
+    });
+
+    document.getElementById('copy-all-btn').addEventListener('click', () => {
+      const successfulResults = currentResults.filter(r => r.success);
+      const allAltText = successfulResults.map(r => `${r.name}: ${r.altText}`).join('\n\n');
+      const success = copyToClipboard(allAltText);
+      if (success) {
+        showTemporaryMessage('✅ All alt text copied to clipboard!');
+      }
+    });
+
+    document.getElementById('reprocess-long-btn').addEventListener('click', () => {
+      const longResults = currentResults.filter(r => r.success && r.charCount > 175);
+      if (longResults.length === 0) {
+        showTemporaryMessage('No descriptions need reprocessing');
+        return;
+      }
+      
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'reprocess',
+          items: longResults.map(r => r.name)
+        } 
+      }, '*');
+      showStatus('Reprocessing long descriptions...');
+    });
+    
+    function copyToClipboard(text) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (!successful) {
+          throw new Error('Copy command failed');
+        }
+        
+        console.log('Text copied to clipboard');
+        return true;
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Copy failed. Here\'s the text:\n\n' + text);
+        return false;
+      }
+    }
+
+    function copyAltText(altText, button) {
+      const success = copyToClipboard(altText);
+      if (success) {
+        const originalText = button.textContent;
+        button.textContent = '✓';
+        button.classList.add('copied');
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.classList.remove('copied');
+        }, 2000);
+      }
+    }
+
+    function showStatus(message) {
+      document.getElementById('status').innerHTML = `<div class="status">${message}</div>`;
+    }
+
+    function hideElement(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function showElement(id) {
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function showTemporaryMessage(message) {
+      showStatus(message);
+      setTimeout(() => {
+        document.getElementById('status').innerHTML = '';
+      }, 3000);
+    }
+
+    function updateStats(results) {
+      const successful = results.filter(r => r.success).length;
+      const total = results.length;
+      const longOnes = results.filter(r => r.success && r.charCount > 175).length;
+      
+      document.getElementById('stats').innerHTML = 
+        `${successful}/${total} successful • ${longOnes} over 175 characters`;
+    }
+    
+    function showResults(results) {
+      currentResults = results;
+      const resultsDiv = document.getElementById('results');
+      let html = '<h3 style="font-size: 14px; margin: 16px 0 8px 0; color: #374151;">Analysis Results</h3>';
+      
+      results.forEach((result, index) => {
+        if (result.success) {
+          const charClass = result.charCount > 200 ? 'over-limit' : 
+                           result.charCount >= 150 && result.charCount <= 200 ? 'perfect' : '';
+          
+          html += `
+            <div class="result success">
+              <div class="node-name">✅ ${result.name}</div>
+              <div class="alt-text">
+                ${result.altText}
+                <button class="copy-btn" onclick="copyAltText('${result.altText.replace(/'/g, "\\'")}', this)">Copy</button>
+              </div>
+              <div class="char-count ${charClass}">
+                <span>${result.charCount}/200 characters</span>
+                <small>Source: ${result.imageNodeName}</small>
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="result error">
+              <div class="node-name">❌ ${result.name}</div>
+              <div class="error-message">Error: ${result.error}</div>
+              ${result.imageNodeName ? `<div style="font-size: 11px; margin-top: 4px;">Image node: <em>${result.imageNodeName}</em></div>` : ''}
+            </div>
+          `;
+        }
+      });
+      
+      resultsDiv.innerHTML = html;
+      
+      if (results.some(r => r.success) && results.length > 1) {
+        showElement('bulk-actions');
+        updateStats(results);
+      } else {
+        hideElement('bulk-actions');
+      }
+    }
+    
+    window.addEventListener('message', (event) => {
+      const msg = event.data.pluginMessage;
+      
+      if (msg.type === 'status') {
+        showStatus(msg.message);
+      }
+      
+      if (msg.type === 'error') {
+        document.getElementById('results').innerHTML = `<div class="result error"><div class="error-message">${msg.message}</div></div>`;
+        document.getElementById('analyze-btn').disabled = false;
+      }
+      
+      if (msg.type === 'results') {
+        showResults(msg.results);
+        document.getElementById('analyze-btn').disabled = false;
+        const successCount = msg.results.filter(r => r.success).length;
+        showStatus(`✅ Analysis complete! Generated ${successCount} alt text descriptions.`);
+      }
+    });
+  </script>
+</body>
+</html>
