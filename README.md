@@ -2,7 +2,7 @@
 
 A Figma plugin that uses Claude Vision AI to automatically generate accessibility alt text descriptions for artwork and images.
 
-![Plugin Demo](examples/demo-screenshot.png)
+![Plugin showing generated alt text results with bulk actions and individual artwork descriptions](examples/plugin-results-demo.png)
 
 ## 🚀 Quick Start
 
@@ -10,7 +10,7 @@ A Figma plugin that uses Claude Vision AI to automatically generate accessibilit
 2. **Install the Figma plugin** from the files in `/plugin/`
 3. **Select artwork** in Figma and generate alt text instantly
 
-![Plugin Results](examples/results-example.png)
+![Clean plugin interface with analyze button ready to process selected artwork](examples/plugin-interface.png)
 
 ## ✨ Features
 
@@ -21,11 +21,50 @@ A Figma plugin that uses Claude Vision AI to automatically generate accessibilit
 - 🔄 **Batch Processing** - Handle multiple artworks at once
 - 📋 **Easy Copy** - One-click copying for immediate use
 
+## How It Works
+
+![Figma interface showing the plugin in action with selected artwork and analysis in progress](examples/figma-integration-wide.png)
+
+1. **Select artwork** in your Figma file
+2. **Open the plugin** and click "Analyze Selected Artwork"
+3. **Review generated descriptions** with character counts and quality indicators
+4. **Copy alt text** for immediate use in your projects
+
+![Figma interface showing the plugin in action with selected artwork and analysis in progress](examples/figma-integration.png)
+
+![Plugin processing artwork with Claude Vision AI showing progress indicator](examples/plugin-processing.png)
+
+![Final results showing generated alt text with copy functionality and character count](examples/plugin-single-result.png)
+
+## Repository Structure
+
+Your repository should be organized like this:
+
+```
+figma-art-alt-text-generator/
+├── README.md                 # Main documentation
+├── LICENSE                   # MIT license
+├── api/                      # Next.js backend for Vercel deployment
+│   ├── package.json         # Dependencies
+│   ├── vercel.json          # Deployment configuration
+│   └── app/
+│       └── api/
+│           └── claude/
+│               └── route.ts  # Claude API endpoint
+├── examples/                 # Screenshots and demo images
+│   ├── plugin-results-demo.png
+│   ├── plugin-interface.png
+│   ├── figma-integration-wide.png
+│   ├── figma-integration.png
+│   ├── plugin-processing.png
+│   └── plugin-single-result.png
+└── plugin/                   # Figma plugin files
+    ├── manifest.json        # Plugin configuration
+    ├── code.js              # Main plugin logic
+    └── ui.html              # User interface
+```
+
 ## Overview
-
-This plugin analyzes selected artwork in Figma and generates descriptive alt text using Claude's vision capabilities. It's designed to help artists, designers, and content creators make their visual content more accessible.
-
-## Architecture
 
 The plugin consists of two main parts:
 1. **Figma Plugin** - Runs inside Figma, analyzes selected nodes, exports images
